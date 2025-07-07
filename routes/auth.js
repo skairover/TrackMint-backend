@@ -14,7 +14,7 @@ router.get(
   passport.authenticate('google', { failureRedirect: '/login' }),
   (req, res) => {
     // User is authenticated and session is created
-    res.redirect('http://localhost:5173'); // Redirect to frontend
+    res.redirect('https://trackmint.vercel.app'); // Redirect to frontend
   }
 );
 
