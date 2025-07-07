@@ -11,6 +11,7 @@ dotenv.config();
 require('./config/passport'); // Google strategy + passport config
 
 const app = express();
+app.set('trust proxy', 1); 
 
 // ===== MIDDLEWARE =====
 app.use(express.json());

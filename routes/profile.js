@@ -1,5 +1,6 @@
 const express = require('express');
 const User = require('../models/User');
+
 const router = express.Router();
 router.patch('/', async (req, res) => {
   if (!req.user) return res.status(401).json({ error: 'Not logged in' });
