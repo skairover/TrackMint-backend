@@ -17,7 +17,7 @@ app.use(express.json());
 
 // CORS: Allow your frontend
 app.use(cors({
-  origin: ['http://localhost:5173','https://trackmint.vercel.app'],
+  origin: ['http://localhost:5173','https://trackmint.vercel.app', 'https://trackmint-backend.onrender.com'],
   credentials: true
 }));
 
