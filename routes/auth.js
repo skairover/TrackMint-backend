@@ -3,28 +3,13 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const router = express.Router();
-const passport = require('passport');
 
-require('../config/passport');
 
 // Helper to generate JWT
 const generateToken = (user) => {
   return jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 };
 
-// ===== Google OAuth =====
-router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-
-router.get(
-  '/google/callback',
-  passport.authenticate('google', { session: false, failureRedirect: '/login' }),
-  (req, res) => {
-    const token = generateToken(req.user);
-
-    // 🔥 Instead of cookie, redirect with token in URL query
-    res.redirect(`https://trackmint.vercel.app/oauth-success?token=${token}`);
-  }
-);
 
 // ===== Manual Registration =====
 router.post('/register', async (req, res) => {
