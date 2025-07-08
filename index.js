@@ -12,7 +12,7 @@ const app = express();
 // ===== MIDDLEWARE =====
 app.use(express.json());
 app.use(helmet());
-c
+
 
 // ===== CORS (Allow frontend with credentials for cookies if needed) =====
 app.use(cors({
