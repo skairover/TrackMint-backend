@@ -3,19 +3,16 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const router = express.Router();
+const passport = require('passport');
 
-require('../config/passport'); // Keep if you're using Google strategy
+require('../config/passport');
 
 // Helper to generate JWT
 const generateToken = (user) => {
-  return jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-    expiresIn: '7d'
-  });
+  return jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 };
 
 // ===== Google OAuth =====
-const passport = require('passport');
-
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 router.get(
@@ -24,15 +21,8 @@ router.get(
   (req, res) => {
     const token = generateToken(req.user);
 
-    // Send JWT in HTTP-only cookie
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'None',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
-
-    res.redirect('https://trackmint.vercel.app');
+    // 🔥 Instead of cookie, redirect with token in URL query
+    res.redirect(`https://trackmint.vercel.app/oauth-success?token=${token}`);
   }
 );
 
@@ -48,14 +38,6 @@ router.post('/register', async (req, res) => {
     const newUser = await User.create({ name, email, password: hashedPassword });
 
     const token = generateToken(newUser);
-
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'None',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
     res.status(201).json({ message: 'User registered successfully', token });
   } catch (err) {
     console.error('Register error:', err);
@@ -63,7 +45,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// ===== Manual Login (JWT) =====
+// ===== Manual Login =====
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -79,29 +61,17 @@ router.post('/login', async (req, res) => {
     if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
 
     const token = generateToken(user);
-
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'None',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    res.status(200).json({ message: 'Logged in successfully' });
+    res.status(200).json({ message: 'Logged in successfully', token });
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Something went wrong during login' });
   }
 });
 
-// ===== Logout (Clear Cookie) =====
+// ===== Logout (Frontend handles it now) =====
 router.post('/logout', (req, res) => {
-  res.clearCookie('token', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'None',
-  });
-  return res.status(200).json({ message: 'Logged out successfully' });
+  // No more cookies to clear
+  return res.status(200).json({ message: 'Logged out successfully (frontend should clear token)' });
 });
 
 module.exports = router;

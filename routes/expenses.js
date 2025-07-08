@@ -37,8 +37,14 @@ router.get('/', auth, async (req, res) => {
 // DELETE: Remove expense
 router.delete('/:id', auth, async (req, res) => {
   try {
-    const deleted = await Expense.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ error: 'Expense not found' });
+    const expense = await Expense.findById(req.params.id);
+
+    if (!expense) return res.status(404).json({ error: 'Expense not found' });
+    if (expense.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ error: 'Unauthorized: You cannot delete this expense' });
+    }
+
+    await expense.deleteOne();
     res.json({ message: 'Expense deleted' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete expense' });

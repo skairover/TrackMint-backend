@@ -37,8 +37,14 @@ router.get('/', auth, async (req, res) => {
 // Delete income
 router.delete('/:id', auth, async (req, res) => {
   try {
-    const deleted = await Income.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ error: 'Income not found' });
+    const income = await Income.findById(req.params.id);
+
+    if (!income) return res.status(404).json({ error: 'Income not found' });
+    if (income.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ error: 'Unauthorized: You cannot delete this income' });
+    }
+
+    await income.deleteOne();
     res.json({ message: 'Income deleted' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete income' });
