@@ -1,16 +1,11 @@
- const express = require('express');
- const Income = require('../models/Income');
- const router = express.Router();
+const express = require('express');
+const Income = require('../models/Income');
+const auth = require('../Middleware/authMiddleware'); // ✅ Import JWT middleware
 
+const router = express.Router();
 
-
-
-const isAuthenticated = (req, res, next) => {
-  if (req.isAuthenticated()) return next();
-  return res.status(401).json({ error: 'Not authenticated' });
-};
-
-router.post('/', isAuthenticated, async (req, res) => {
+// Add income
+router.post('/', auth, async (req, res) => {
   const { amount, category, currency } = req.body;
 
   try {
@@ -18,7 +13,7 @@ router.post('/', isAuthenticated, async (req, res) => {
       amount,
       category,
       currency,
-      userId: req.user._id // ✅ Use the session user
+      userId: req.user._id // ✅ Comes from JWT middleware
     });
     await income.save();
     res.status(201).json(income);
@@ -28,7 +23,8 @@ router.post('/', isAuthenticated, async (req, res) => {
   }
 });
 
-router.get('/', isAuthenticated, async (req, res) => {
+// Get incomes
+router.get('/', auth, async (req, res) => {
   try {
     const incomes = await Income.find({ userId: req.user._id }).sort({ createdAt: -1 });
     res.json(incomes);
@@ -38,7 +34,8 @@ router.get('/', isAuthenticated, async (req, res) => {
   }
 });
 
-router.delete('/:id', isAuthenticated, async (req, res) => {
+// Delete income
+router.delete('/:id', auth, async (req, res) => {
   try {
     const deleted = await Income.findByIdAndDelete(req.params.id);
     if (!deleted) return res.status(404).json({ error: 'Income not found' });
@@ -48,4 +45,4 @@ router.delete('/:id', isAuthenticated, async (req, res) => {
   }
 });
 
- module.exports = router;
+module.exports = router;

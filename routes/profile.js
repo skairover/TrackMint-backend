@@ -1,15 +1,16 @@
 const express = require('express');
 const User = require('../models/User');
+const auth = require('../Middleware/authMiddleware'); // ✅ import JWT middleware
 
 const router = express.Router();
-router.patch('/', async (req, res) => {
-  if (!req.user) return res.status(401).json({ error: 'Not logged in' });
 
+// PATCH /api/profile
+router.patch('/', auth, async (req, res) => {
   const { name, email } = req.body;
 
   try {
-    const updatedUser = await User.findOneAndUpdate(
-      { _id: req.user._id }, // ✅ use the logged-in user from session
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id, // ✅ req.user is set by JWT middleware
       { $set: { name, email } },
       { new: true, runValidators: true }
     );

@@ -1,14 +1,11 @@
 const express = require('express');
 const Expense = require('../models/Expense');
+const auth = require('../Middleware/authMiddleware'); // ✅ JWT middleware
+
 const router = express.Router();
 
-// Middleware to protect routes (using Passport session)
-const isAuthenticated = (req, res, next) => {
-  if (req.isAuthenticated()) return next();
-  return res.status(401).json({ error: 'Not authenticated' });
-};
-
-router.post('/', isAuthenticated, async (req, res) => {
+// POST: Add expense
+router.post('/', auth, async (req, res) => {
   const { amount, category, currency } = req.body;
 
   try {
@@ -16,7 +13,7 @@ router.post('/', isAuthenticated, async (req, res) => {
       amount,
       category,
       currency,
-      userId: req.user._id // ✅ Use the session user
+      userId: req.user._id // ✅ Provided by JWT middleware
     });
     await expense.save();
     res.status(201).json(expense);
@@ -26,7 +23,8 @@ router.post('/', isAuthenticated, async (req, res) => {
   }
 });
 
-router.get('/', isAuthenticated, async (req, res) => {
+// GET: Fetch expenses
+router.get('/', auth, async (req, res) => {
   try {
     const expenses = await Expense.find({ userId: req.user._id }).sort({ createdAt: -1 });
     res.json(expenses);
@@ -36,7 +34,8 @@ router.get('/', isAuthenticated, async (req, res) => {
   }
 });
 
-router.delete('/:id', isAuthenticated, async (req, res) => {
+// DELETE: Remove expense
+router.delete('/:id', auth, async (req, res) => {
   try {
     const deleted = await Expense.findByIdAndDelete(req.params.id);
     if (!deleted) return res.status(404).json({ error: 'Expense not found' });
