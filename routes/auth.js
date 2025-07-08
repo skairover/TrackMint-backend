@@ -33,9 +33,11 @@ router.post('/register', async (req, res) => {
 // ===== Manual Login =====
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
+  console.log('[LOGIN] Received email:', email);
 
   try {
     const user = await User.findOne({ email });
+     console.log('[LOGIN] Fetched user:', user);
     if (!user) return res.status(400).json({ error: 'Invalid credentials' });
 
     if (!user.password) {
@@ -43,12 +45,15 @@ router.post('/login', async (req, res) => {
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log('[LOGIN] Password match:', isMatch);
     if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
 
     const token = generateToken(user);
+    
+    console.log('[LOGIN] Generated token:', token);
     res.status(200).json({ message: 'Logged in successfully', token });
   } catch (err) {
-    console.error('Login error:', err);
+     console.error('[LOGIN] Error:', err.stack || err.message);
     res.status(500).json({ error: 'Something went wrong during login' });
   }
 });
