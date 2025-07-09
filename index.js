@@ -16,9 +16,11 @@ app.use(helmet());
 
 // ===== CORS (Allow frontend with credentials for cookies if needed) =====
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://trackmint.vercel.app']
-  
+  origin: ['http://localhost:5173', 'https://trackmint.vercel.app'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
 const limiter = rateLimit({
   windosMs: 15 * 60 * 1000,
   max: 100,
