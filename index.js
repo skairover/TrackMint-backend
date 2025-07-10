@@ -12,6 +12,7 @@ const app = express();
 // ===== MIDDLEWARE =====
 app.use(express.json());
 app.use(helmet());
+app.set('trust proxy', true);
 
 
 // ===== CORS (Allow frontend with credentials for cookies if needed) =====
