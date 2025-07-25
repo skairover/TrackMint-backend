@@ -31,7 +31,6 @@ app.use(limiter);
 app.use('/api/auth', require('./routes/auth'));         // ✅ Auth route returns JWT now
 app.use('/api/expenses', require('./routes/expenses')); // ✅ JWT protected
 app.use('/api/incomes', require('./routes/incomes'));   // ✅ JWT protected
-app.use('/api/profile', require('./routes/profile'));   // ✅ JWT protected
 app.use('/api/user', require('./routes/user'));         // ✅ JWT protected
 app.use('/uploads', express.static('uploads'));         // For profile pics
 
